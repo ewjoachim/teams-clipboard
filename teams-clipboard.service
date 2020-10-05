@@ -1,0 +1,17 @@
+# Create this file with:
+# systemctl --user edit --force --full teams-clipboard.service
+
+[Unit]
+Description=Teams Clipboard Rich text to URL converter
+
+[Service]
+ExecStart=/home/<you>/.local/bin/teams-clipboard
+
+[Install]
+WantedBy=graphical.target
+
+# Then run
+# systemctl --user daemon-reload
+# systemctl --user enable --now teams-clipboard
+
+# Manage the service with systemctl --user <action> teams-clipboard
