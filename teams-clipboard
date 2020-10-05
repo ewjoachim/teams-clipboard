@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+​
+import signal
+from html.parser import HTMLParser
+​
+import gi
+​
+gi.require_version('Gtk', '3.0')
+gi.require_version('Gdk', '3.0')
+from gi.repository import Gdk, Gtk
+​
+signal.signal(signal.SIGINT, signal.SIG_DFL)
+​
+clip = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+​
+​
+class TeamsLinkExtractor(HTMLParser):
+    href = None
+​
+    def get_link(self, html):
+        self.href = None
+        self.reset()
+        self.feed(html)
+        self.close()
+        return self.href
+​
+    def handle_starttag(self, tag, attrs):
+        d_attrs = dict(attrs)
+        if tag != "a":
+            return
+        if d_attrs["class"] != "me-email-headline":
+            return
+        self.href = d_attrs["href"]
+​
+​
+extractor = TeamsLinkExtractor()
+​
+​
+def callback(clip: Gtk.Clipboard, *args):
+    selection_data = clip.wait_for_contents(Gdk.Atom.intern("text/html", False))
+    if not selection_data:
+        return
+    html = selection_data.get_data().decode("utf-8")
+    if "Join Microsoft Teams Meeting" not in html:
+        return
+​
+    try:
+        link = extractor.get_link(html)
+        assert link
+    except Exception:
+        print("Link couldn't he extracted")
+        raise
+​
+    print(f"Extracting teams link to clipboard: {link}")
+    clip.set_text(link, -1)
+​
+​
+def main():
+    clip.connect('owner-change', callback)
+    Gtk.main()
+​
+​
+if __name__ == "__main__":
+    main()
