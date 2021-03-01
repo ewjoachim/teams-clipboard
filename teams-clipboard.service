@@ -9,6 +9,7 @@ ExecStart=/home/<you>/.local/bin/teams-clipboard
 
 [Install]
 WantedBy=graphical.target
+After=gdm.service
 
 # Then run
 # systemctl --user daemon-reload
